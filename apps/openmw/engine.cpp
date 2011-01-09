@@ -12,6 +12,7 @@
 #include <components/bsa/bsa_archive.hpp>
 #include <components/esm/loadregn.hpp>
 #include <components/esm/esm_reader.hpp>
+#include "components/file_finder/file_finder.hpp"
 #include <openengine/gui/manager.hpp>
 #include "mwgui/window_manager.hpp"
 
@@ -225,7 +226,7 @@ void OMW::Engine::loadBSA()
         if (boost::filesystem::extension (iter->path())==".bsa")
         {
             std::cout << "Adding " << iter->path().string() << std::endl;
-            addBSA(iter->path().file_string(),"General", mDataDir.native_directory_string());
+            addBSA(iter->path().file_string(), *dataFileFinder);
         }
     }
 }
@@ -244,6 +245,8 @@ void OMW::Engine::addResourcesDirectory (const boost::filesystem::path& path)
 void OMW::Engine::setDataDir (const boost::filesystem::path& dataDir)
 {
     mDataDir = boost::filesystem::system_complete (dataDir);
+    std::auto_ptr<FileFinder> t( new FileFinder( dataDir ) );
+    dataFileFinder = t;
 }
 
 // Set start cell name (only interiors for now)
@@ -291,6 +294,7 @@ void OMW::Engine::go()
 {
     assert (!mEnvironment.mWorld);
     assert (!mDataDir.empty());
+    assert (dataFileFinder.get() != 0);
     assert (!mCellName.empty());
     assert (!mMaster.empty());
 

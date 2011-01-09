@@ -39,9 +39,9 @@ private:
   BSAFile arc;
 
 public:
-  BSAArchive(const String& name, const String& data_dir)
+  BSAArchive(const String& name, const FileFinder& fileFinder)
              : Archive(name, "BSA")
-  { arc.open(name, data_dir); }
+  { arc.open(name, fileFinder); }
 
   bool isCaseSensitive() const { return false; }
 
@@ -132,9 +132,9 @@ public:
 class BSAArchiveFactory : public ArchiveFactory
 {
 private:
-    String data;
+    const FileFinder& dataFileFinder;
 public:
-  BSAArchiveFactory(const String& idata) {data = idata;}
+  BSAArchiveFactory(const FileFinder& fileFinder) : dataFileFinder(fileFinder) {}
   const String& getType() const
   {
     static String name = "BSA";
@@ -143,27 +143,27 @@ public:
 
   Archive *createInstance( const String& name )
   {
-    return new BSAArchive(name, data);
+    return new BSAArchive(name, dataFileFinder);
   }
 
   void destroyInstance( Archive* arch) { delete arch; }
 };
 
 static bool init = false;
-static void insertBSAFactory(const String& data_dir)
+static void insertBSAFactory(const FileFinder& fileFinder)
 {
   if(!init)
     {
-      ArchiveManager::getSingleton().addArchiveFactory( new BSAArchiveFactory(data_dir) );
+      ArchiveManager::getSingleton().addArchiveFactory( new BSAArchiveFactory(fileFinder) );
       init = true;
     }
 }
 
 // The function below is the only publicly exposed part of this file
 
-void addBSA(const std::string& name, const std::string& group, const std::string& data)
+void addBSA(const std::string& name, const FileFinder& fileFinder, const std::string& group)
 {
-  insertBSAFactory(data);
+  insertBSAFactory(fileFinder);
   ResourceGroupManager::getSingleton().
     addResourceLocation(name, "BSA", group);
 }

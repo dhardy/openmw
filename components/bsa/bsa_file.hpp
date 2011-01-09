@@ -24,6 +24,7 @@
 #ifndef _BSA_FILE_H_
 #define _BSA_FILE_H_
 
+#include "components/file_finder/file_finder.hpp"
 #include <libs/mangle/stream/stream.hpp>
 #include <libs/platform/stdint.h>
 #include <libs/platform/strings.h>
@@ -48,7 +49,10 @@ class BSAFile
 
     // Zero-terminated file name
     char* name;
-    bool external; // Offset is set to 0 if this is true
+    
+    // Path to external resource (empty string if not external).
+    // Offset is set to 0 if external.
+    std::string extPath;
   };
 
   typedef std::vector<FileStruct> FileList;
@@ -70,8 +74,7 @@ class BSAFile
 
   /// Used for error messages
   std::string filename;
-  std::string data_dir; // Where might 'filename' have newer files to load than what is in the BSA?
-
+  
   /// Case insensitive string comparison
   struct iltstr
   {
@@ -90,7 +93,7 @@ class BSAFile
   void fail(const std::string &msg);
 
   /// Read header information from the input source
-  void readHeader();
+  void readHeader(const FileFinder& fileFinder);
 
   /// Get the index of a given file name, or -1 if not found
   int getIndex(const char *str);
@@ -105,13 +108,20 @@ class BSAFile
   BSAFile()
     : input(), isLoaded(false) {}
 
-  /// Open an archive file.
-  void open(const std::string &file, const std::string &data);
+  /** Open an archive file.
+   * 
+   * @param file BSA archive to open
+   * @param fileFinder A FileFinder instance to data directory
+   */
+  void open(const std::string &file, const FileFinder& fileFinder);
 
-  /** Open an archive from a generic stream. The 'name' parameter is
-      used for error messages.
-  */
-  void open(Mangle::Stream::StreamPtr inp, const std::string &name, const std::string &data);
+  /** Open an archive from a generic stream.
+   *
+   * @param inp Stream of file
+   * @param name Used for error messages
+   * @param fileFinder A FileFinder instance to data directory
+   */
+  void open(Mangle::Stream::StreamPtr inp, const std::string &name, const FileFinder& fileFinder);
 
   /* -----------------------------------
    * Archive file routines

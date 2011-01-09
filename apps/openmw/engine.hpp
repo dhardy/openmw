@@ -48,6 +48,8 @@ namespace OEngine
   }
 }
 
+class FileFinder;
+
 namespace OMW
 {
     /// \brief Main engine class, that brings together all the components of OpenMW
@@ -57,6 +59,7 @@ namespace OMW
 
             //int nFiles;
             boost::filesystem::path mDataDir;
+            std::auto_ptr<FileFinder> dataFileFinder;
             OEngine::Render::OgreRenderer mOgre;
             std::string mCellName;
             std::string mMaster;

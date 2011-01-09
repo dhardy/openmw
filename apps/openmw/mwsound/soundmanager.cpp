@@ -84,7 +84,7 @@ namespace MWSound
     // finding. It takes DOS paths (any case, \\ slashes or / slashes)
     // relative to the sound dir, and translates them into full paths
     // of existing files in the filesystem, if they exist.
-    FileFinder::FileFinder files;
+    FileFinder files;
 
     SoundImpl(Ogre::Root *root, Ogre::Camera *camera,
               const ESMS::ESMStore &str,

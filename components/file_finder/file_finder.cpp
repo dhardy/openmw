@@ -19,16 +19,23 @@
 #include "components/file_finder/file_finder.hpp"
 
 #include <iostream>
+#include <memory>
 
 using namespace std;
 using namespace boost::filesystem;
 
-namespace FileFinder {
+void FileFinder::Inserter::add(const boost::filesystem::path& pth)
+{
+    std::string file = pth.file_string();     // full path
+    std::string key = file.substr(cut);  // relative path
+    normalize( key );
+    owner.table[key] = file;
+}
 
 /** Search the given path and return all file paths through 'ret'. If
     recurse==true, all files in subdirectories are returned as well.
 */
-void find(const path & dir_path, Inserter &ret, bool recurse)
+void FileFinder::find(const path& dir_path, Inserter& ret, bool recurse)
 {
     if ( !exists( dir_path ) ){
         cout << "Path " << dir_path << " not found\n";
@@ -47,7 +54,7 @@ void find(const path & dir_path, Inserter &ret, bool recurse)
     }
 }
 
-void normalize(std::string& pth) {
+void FileFinder::normalize(std::string& pth) {
     for (size_t i=0; i<pth.size(); ++i) {
         if (pth[i] >= 'A' && pth[i] <= 'Z') {
             pth[i] += 'a'-'A';
@@ -57,7 +64,7 @@ void normalize(std::string& pth) {
     }
 }
 
-FileFinder::FileFinder(const boost::filesystem::path &path, bool recurse)
+FileFinder::FileFinder(const boost::filesystem::path& path, bool recurse)
 {
     Inserter inserter( *this );
 
@@ -74,20 +81,18 @@ FileFinder::FileFinder(const boost::filesystem::path &path, bool recurse)
 
     // Fill the map
     find(path, inserter, recurse);
+//     cout<<pstring<<": "<<table.size()<<" elements"<<endl;
 }
 
 const std::string& FileFinder::lookup(const std::string& file) const
 {
     std::string copy = file;
     normalize(copy);
-    std::map<std::string,std::string>::const_iterator it = table.find(copy);
+    Table::const_iterator it = table.find(copy);
     if( it == table.end() ){
         std::string msg = "No data file: ";
         msg += file;
         throw std::runtime_error(msg);
     }
     return it->second;
-}
-
-
 }

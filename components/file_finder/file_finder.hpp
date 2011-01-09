@@ -21,13 +21,7 @@
 
 #include <boost/filesystem.hpp>
 #include <map>
-
-namespace FileFinder
-{
-
-/** Normalize a relative path by replacing \ with / and capital letters with
- * small letters. */
-void normalize(std::string& pth);
+#include <boost/unordered_map.hpp>
 
 /** Represents a mapping from relative data paths to absolute paths, with
  * case and path-separator insensitive matches (windows/unix compatibility).
@@ -35,8 +29,24 @@ void normalize(std::string& pth);
 class FileFinder
 {
     // Map of standardized relative paths (lower-case, / instead of \ ) to absolute paths
-    std::map<std::string, std::string> table;
-    friend class Inserter;
+    typedef boost::unordered_map<std::string, std::string> Table;
+    Table table;
+    
+    struct Inserter
+    {
+        FileFinder& owner;
+        int cut;
+
+        Inserter( FileFinder& ff ) : owner(ff) {}
+
+    void add(const boost::filesystem::path& pth);
+    };
+    
+    void find(const boost::filesystem::path& dir_path, Inserter& ret, bool recurse);
+    
+    /** Normalize a relative path by replacing \ with / and capital letters with
+     * small letters. */
+    static void normalize(std::string& pth);
     
 public:
     /** Constructor.
@@ -44,7 +54,7 @@ public:
      * @param path Absolute path to a data directory
      * @param recurse If true, also look in subfolders for data files
      */
-    FileFinder(const boost::filesystem::path &path, bool recurse=true);
+    FileFinder(const boost::filesystem::path& path, bool recurse=true);
     
     //NOTE: has() and lookup() have to create a copy of input path
     
@@ -62,21 +72,4 @@ public:
     const std::string& lookup(const std::string& file) const;
 };
 
-struct Inserter
-{
-    FileFinder& owner;
-    int cut;
-
-    Inserter( FileFinder& ff ) : owner(ff) {}
-
-    void add(const boost::filesystem::path &pth)
-    {
-        std::string file = pth.file_string();     // full path
-        std::string key = file.substr(cut);  // relative path
-        normalize( key );
-        owner.table[key] = file;
-    }
-};
-
-}
 #endif
