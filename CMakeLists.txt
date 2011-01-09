@@ -88,11 +88,9 @@ set(TO_UTF8_HEADER
 source_group(components\\to_utf8 FILES ${TO_UTF8} ${TO_UTF8_HEADER})
 
 set(FILE_FINDER
-    ${COMP_DIR}/file_finder/search.cpp)
+    ${COMP_DIR}/file_finder/file_finder.cpp)
 set(FILE_FINDER_HEADER
-    ${COMP_DIR}/file_finder/file_finder.hpp
-    ${COMP_DIR}/file_finder/filename_less.hpp
-    ${COMP_DIR}/file_finder/search.hpp)
+    ${COMP_DIR}/file_finder/file_finder.hpp)
 source_group(components\\file_finder FILES ${FILE_FINDER} ${FILE_FINDER_HEADER})
 
 set(ESM_STORE
